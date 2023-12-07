@@ -2,7 +2,7 @@ from __future__ import annotations
 import numpy as np
 FILENAME = '7.txt'
 
-rank_map1 = {
+RANK_MAP = {
     '2': 2,
     '3': 3,
     '4': 4,
@@ -18,14 +18,14 @@ rank_map1 = {
     'A': 14
 }
 
-reversed_rank_map1 = {v: k for k, v in rank_map1.items()}
+REVERSED_RANK_MAP = {v: k for k, v in RANK_MAP.items()}
+REVERSED_RANK_MAP[1] = 'J'
 
 
 class Card:
-    def __init__(self, card, rank_map, reversed_rank_map):
-        self.rank = rank_map[card]
+    def __init__(self, card):
+        self.rank = RANK_MAP[card]
         # For printing purposes
-        self.reversed_rank_map = reversed_rank_map
 
     def __eq__(self, other: Card):
         return self.rank == other.rank
@@ -40,32 +40,14 @@ class Card:
         return hash(self.rank)
 
     def __str__(self):
-        return self.reversed_rank_map[self.rank]
+        return REVERSED_RANK_MAP[self.rank]
 
     def __repr__(self):
         return str(self)
 
 
-rank_map2 = {
-    '2': 2,
-    '3': 3,
-    '4': 4,
-    '5': 5,
-    '6': 6,
-    '7': 7,
-    '8': 8,
-    '9': 9,
-    'T': 10,
-    'J': 1,
-    'Q': 12,
-    'K': 13,
-    'A': 14
-}
-
-reversed_rank_map2 = {v: k for k, v in rank_map2.items()}
-
-
-joker_card = Card('J', rank_map2, reversed_rank_map2)
+joker_card = Card('J')
+joker_card.rank = 1
 
 
 class Hand:
@@ -194,25 +176,25 @@ class Hand:
         return str(self.cards)
 
 
-def read_cards(cards, rank_map, reversed_rank_map, with_jokers=False):
+def read_cards(cards, with_jokers=False):
     if with_jokers:
-        return [joker_card if card == 'J' else Card(card, rank_map, reversed_rank_map) for card in cards]
+        return [joker_card if card == 'J' else Card(card) for card in cards]
     else:
-        return [Card(card, rank_map, reversed_rank_map) for card in cards]
+        return [Card(card) for card in cards]
 
 
-def read_input(filename, rank_map, reversed_rank_map, with_jokers=False):
+def read_input(filename, with_jokers=False):
     hands, bids = [], []
     with open(filename) as f:
         for line in f:
             hand_s, bid = line.split(' ')
             bids.append(int(bid))
             hands.append(
-                Hand(read_cards(hand_s, rank_map, reversed_rank_map, with_jokers=with_jokers), with_jokers=with_jokers))
+                Hand(read_cards(hand_s, with_jokers=with_jokers), with_jokers=with_jokers))
     return hands, bids
 
 
-hands, bids = read_input(FILENAME, rank_map1, reversed_rank_map1)
+hands, bids = read_input(FILENAME)
 # First part
 sorted_bids = sorted(bids, key=lambda bid: hands[bids.index(bid)])
 sorted_bids = np.array(sorted_bids)
@@ -223,7 +205,7 @@ print(sum(rank*sorted_bids))
 
 
 hands, bids = read_input(
-    FILENAME, rank_map2, reversed_rank_map2, with_jokers=True)
+    FILENAME, with_jokers=True)
 
 sorted_bids = sorted(bids, key=lambda bid: hands[bids.index(bid)])
 sorted_bids = np.array(sorted_bids)
