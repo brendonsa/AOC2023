@@ -53,10 +53,6 @@ def calculate_distances(expanded_map):
         a,b = comb
         distance = cityblock(locations[a],locations[b])
         locations_distance[(a,b)]=distance
-        # if locations_distance[a]> distance:
-        #     locations_distance[a] = distance
-        # if locations_distance[b]> distance:
-        #     locations_distance[b] = distance
     return(locations_distance)
 
             
