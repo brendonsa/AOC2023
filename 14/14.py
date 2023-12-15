@@ -1,4 +1,5 @@
 import numpy as np
+import time
 
 FILENAME = '14.txt'
 
@@ -74,14 +75,6 @@ data = read_data(FILENAME)
 mask = np.tile(np.arange(data.shape[0], 0, -1),
                data.shape[1]).reshape(data.shape).T
 
-# Sample 500 of times
-sums = np.zeros(500)
-for i in range(500):
-    data = cycle(data)
-    data_n = data.copy()
-    data_n[data_n == -1] = 0
-    sums[i] = (data_n*mask).sum()
-
 
 def find_period(sums, period_start=1):
     for i in range(1, len(sums)//2):
@@ -103,11 +96,53 @@ def find_period(sums, period_start=1):
                 return i
 
 
+def find_period_fast(filename):
+    data = read_data(filename)
+    mask = np.tile(np.arange(data.shape[0], 0, -1),
+                   data.shape[1]).reshape(data.shape).T
+    all_runs = dict()
+    period_start = 0
+    period_length = 0
+    sums = []
+    for i in range(0, 1000000000):
+        data = cycle(data)
+        data_tuple = tuple(data.flatten())
+        if data_tuple in all_runs:
+            period_start = all_runs[data_tuple]
+            period_length = abs(i - all_runs[data_tuple])
+            break
+        else:
+            all_runs[data_tuple] = i
+            data_n = data.copy()
+            data_n[data_n == -1] = 0
+            sums.append((data_n*mask).sum())
+    return period_start, period_length, sums
+
+
 # Find number bigger than period start by hand or by bruteforcing through numbers. Save guess is half of your samples
 # (supposed that you have enough samples and period is not bigger than half of half)
+# measure function time
+time_start = time.time()
+period_start, period, sums = find_period_fast(FILENAME)
+period_nums = sums[period_start:period+period_start]
+period_num = 1000000000 - period_start-1
+print(int(period_nums[period_num % (period)]))
+print(time.time() - time_start)
+
+
+# Sample 500 of times
+time_start = time.time()
+sums = np.zeros(500)
+for i in range(500):
+    data = cycle(data)
+    data_n = data.copy()
+    data_n[data_n == -1] = 0
+    sums[i] = (data_n*mask).sum()
+
 
 period_start = len(sums)//2
 period = find_period(sums, period_start)
 period_nums = sums[period_start:period+period_start]
 period_num = 1000000000 - period_start-1
 print(int(period_nums[period_num % (period)]))
+print(time.time() - time_start)
